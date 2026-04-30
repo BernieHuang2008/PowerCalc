@@ -40,32 +40,42 @@ document.addEventListener("DOMContentLoaded", () => {
                 let result = parser.evaluate(inputVal);
 
                 let texResult = "";
+                let plainResult = "";
                 
                 if (result !== undefined) {
                     if (typeof result === 'function') {
                         texResult = "\\text{[Function]}";
+                        plainResult = "[Function]";
                     } else if (result.isResultSet) {
                          // Multiple results e.g., variable assignment + expression
                          let lastRes = result.entries[result.entries.length - 1];
-                         texResult = math.parse(math.format(lastRes, {precision: 14})).toTex();
+                         plainResult = math.format(lastRes, {precision: 14});
+                         texResult = math.parse(plainResult).toTex();
                     } else {
-                         texResult = math.parse(math.format(result, {precision: 14})).toTex();
+                         plainResult = math.format(result, {precision: 14});
+                         texResult = math.parse(plainResult).toTex();
                     }
+                    cell.copyText = plainResult;
                     cell.outputEl.textContent = `\\[ ${texResult} \\]`;
                     if (window.MathJax && MathJax.typesetPromise) {
                         MathJax.typesetPromise([cell.outputEl]).catch((err) => console.log(err.message));
                     }
                     cell.outputEl.classList.remove('error-output');
                     cell.wrapperEl.classList.add('has-output');
+                    cell.copyBtn.style.display = 'block';
                 } else {
                     // Variable assignment might return undefined in some mathjs versions or situations, but typically returns the value
                     cell.outputEl.textContent = "";
                     cell.wrapperEl.classList.remove('has-output');
+                    cell.copyBtn.style.display = 'none';
+                    cell.copyText = "";
                 }
             } catch (err) {
                 cell.outputEl.textContent = err.toString();
                 cell.outputEl.classList.add('error-output');
                 cell.wrapperEl.classList.add('has-output');
+                cell.copyBtn.style.display = 'none';
+                cell.copyText = "";
             }
             promptIndex++;
         });
@@ -94,9 +104,20 @@ document.addEventListener("DOMContentLoaded", () => {
         input.placeholder = "Enter expression...";
         input.oninput = create_auto_suggest_handler(input);
 
+        const outputWrapper = document.createElement('div');
+        outputWrapper.className = 'output-wrapper';
+
         const output = document.createElement('div');
         output.className = 'output-container';
         
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.innerHTML = '📄';
+        copyBtn.title = '复制结果';
+
+        outputWrapper.appendChild(output);
+        outputWrapper.appendChild(copyBtn);
+
         const deleteBtn = document.createElement('div');
         deleteBtn.className = 'delete-btn';
         deleteBtn.innerHTML = '&times;';
@@ -106,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
         inputContainer.appendChild(input);
         inner.appendChild(deleteBtn);
         inner.appendChild(inputContainer);
-        inner.appendChild(output);
+        inner.appendChild(outputWrapper);
         wrapper.appendChild(inner);
 
         // Insert at specific index visually
@@ -121,8 +142,19 @@ document.addEventListener("DOMContentLoaded", () => {
             wrapperEl: wrapper,
             inputEl: input,
             outputEl: output,
-            promptEl: prompt
+            promptEl: prompt,
+            copyBtn: copyBtn,
+            copyText: ""
         };
+
+        copyBtn.addEventListener('click', () => {
+            if (cellData.copyText) {
+                navigator.clipboard.writeText(cellData.copyText).then(() => {
+                    copyBtn.innerHTML = '✓';
+                    setTimeout(() => copyBtn.innerHTML = '📄', 1500);
+                });
+            }
+        });
 
         cells.splice(index, 0, cellData);
         
