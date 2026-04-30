@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Notebook</title>
+    <!-- 引入最新版 math.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
+    <script>
+        window.MathJax = {
+            chtml: {
+                displayAlign: 'left',
+                displayIndent: '0'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="mathinput_auto_suggestion.css">
+</head>
+<body>
+    <!-- 工具栏 -->
+    <div class="toolbar">
+        <div class="menu-item" id="fileMenu">
+            文件
+            <div class="dropdown-content">
+                <a href="#" id="saveBtn">保存</a>
+                <a href="#" id="loadBtn">加载</a>
+                <input type="file" id="fileInput" style="display: none;" accept=".json">
+            </div>
+        </div>
+        <div class="title">Math Notebook</div>
+    </div>
+
+    <!-- 主体编辑区域 -->
+    <div class="editor-container" id="editor">
+        <!-- 动态生成的单元格将在这里显示 -->
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
