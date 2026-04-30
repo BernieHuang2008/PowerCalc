@@ -1,8 +1,8 @@
 #vscode-suggest-box {
     position: absolute;
-    background-color: #252526;
-    color: #ffffff;
-    border: 1px solid #454545;
+    background-color: var(--suggest-bg, #252526);
+    color: var(--suggest-color, #ffffff);
+    border: 1px solid var(--suggest-border, #454545);
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     z-index: 10000;
     min-width: 250px;
@@ -17,9 +17,9 @@
 
 #vscode-suggest-desc {
     position: absolute;
-    background-color: #252526;
-    color: #cccccc;
-    border: 1px solid #454545;
+    background-color: var(--suggest-bg, #252526);
+    color: var(--suggest-desc, #cccccc);
+    border: 1px solid var(--suggest-border, #454545);
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     z-index: 10000;
     width: 300px;
@@ -40,21 +40,21 @@
 }
 
 .suggest-item-active {
-    background-color: #094771;
+    background-color: var(--suggest-active, #094771);
 }
 
 .suggest-nickname-normal {
-    color: #ffffff;
+    color: var(--suggest-color, #ffffff);
     font-weight: bold;
 }
 
 .suggest-nickname-match {
-    color: #569cd6;
+    color: var(--suggest-match, #569cd6);
     font-weight: bold;
 }
 
 .suggest-cate {
-    color: #888;
+    color: var(--suggest-cate, #888888);
     font-size: 11px;
     margin-left: 15px;
     font-weight: normal;

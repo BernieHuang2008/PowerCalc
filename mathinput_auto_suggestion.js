@@ -241,6 +241,7 @@ function setActiveSuggest(index) {
 
 function showDescription(suggestionMatch, itemEl) {
     const suggestion = suggestionMatch.item;
+    
     if (!suggestion.desc) {
         suggestDesc.style.display = 'none';
         return;
@@ -306,25 +307,67 @@ function create_auto_suggest_window(event) {
     currentSuggestions = suggestions.slice(0, 10); // show top 10
     suggestBox.innerHTML = '';
     
-    currentSuggestions.forEach((match, index) => {
-        const item = match.item;
-        const div = document.createElement('div');
-        div.className = 'suggest-item';
+    currentSuggestions.forEach((itemObj, index) => {
+        const item = itemObj.item;
+        const matches = itemObj.matches;
         
-        let nicknameHtml = item.nickname;
-        // Simple highlighting (matching part could be done via fuse.js matches, but here's a naive approach)
-        nicknameHtml = `<span class="suggest-nickname-normal">${item.nickname}</span>`;
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'suggest-item';
+
+        // Parse matches for highlighting
+        // `nickname` is what we display
+        let nicknameHtml = "";
+        let nickname = item.nickname || "";
+        let matchIndices = [];
         
-        div.innerHTML = `${nicknameHtml}<span class="suggest-cate">${item.cate}</span>`;
+        if (matches) {
+            const nicknameMatch = matches.find(m => m.key === 'nickname');
+            if (nicknameMatch) {
+                matchIndices = nicknameMatch.indices; // Array of [start, end]
+            }
+        }
         
-        div.onclick = () => {
-            applySuggestion(match);
-        };
-        div.onmouseover = () => {
+        // Build highlighted string
+        let currentIndex = 0;
+        for (let i = 0; i < matchIndices.length; i++) {
+            let start = matchIndices[i][0];
+            let end = matchIndices[i][1];
+            
+            // Add unhighlighted text before match
+            if (start > currentIndex) {
+                nicknameHtml += `<span class="suggest-nickname-normal">${nickname.substring(currentIndex, start)}</span>`;
+            }
+            
+            // Add highlighted match (blue and bold)
+            nicknameHtml += `<span class="suggest-nickname-match">${nickname.substring(start, end + 1)}</span>`;
+            
+            currentIndex = end + 1;
+        }
+        
+        // Add remaining text
+        if (currentIndex < nickname.length) {
+            nicknameHtml += `<span class="suggest-nickname-normal">${nickname.substring(currentIndex)}</span>`;
+        }
+        
+        // If no match on nickname, just bold it
+        if (!nicknameHtml) {
+            nicknameHtml = `<span class="suggest-nickname-normal">${nickname}</span>`;
+        }
+
+        const cateSpan = `<span class="suggest-cate">${item.cate || ''}</span>`;
+
+        itemDiv.innerHTML = `<div>${nicknameHtml}</div>${cateSpan}`;
+
+        itemDiv.addEventListener('mousedown', (e) => {
+            e.preventDefault(); 
+            applySuggestion(itemObj);
+        });
+
+        itemDiv.addEventListener('mouseenter', () => {
             setActiveSuggest(index);
-        };
-        
-        suggestBox.appendChild(div);
+        });
+
+        suggestBox.appendChild(itemDiv);
     });
     
     // Position the box
